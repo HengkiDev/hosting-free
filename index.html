@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyHost - HTML Hosting Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            color: #5a67d8;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #5a67d8;
+            box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px dashed #5a67d8;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(90, 103, 216, 0.05);
+            color: #5a67d8;
+            font-weight: 600;
+        }
+
+        .file-upload-label:hover {
+            background: rgba(90, 103, 216, 0.1);
+            border-color: #4c51bf;
+        }
+
+        .file-upload-label.has-file {
+            border-color: #38a169;
+            background: rgba(72, 187, 120, 0.05);
+            color: #38a169;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #5a67d8, #667eea);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(90, 103, 216, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096, #4a5568);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .dashboard {
+            max-width: 900px;
+            width: 95%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .website-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .website-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .website-title {
+            color: #2d3748;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .website-url {
+            color: #5a67d8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .website-url:hover {
+            text-decoration: underline;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .card-actions .btn {
+            flex: 1;
+            min-width: 100px;
+            margin-bottom: 0;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .message.success {
+            background: rgba(72, 187, 120, 0.1);
+            color: #38a169;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+
+        .message.error {
+            background: rgba(229, 62, 62, 0.1);
+            color: #e53e3e;
+            border: 1px solid rgba(229, 62, 62, 0.3);
+        }
+
+        .user-info {
+            background: rgba(90, 103, 216, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .user-info h3 {
+            color: #5a67d8;
+            margin-bottom: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            background: rgba(226, 232, 240, 0.5);
+            border-radius: 10px;
+            padding: 0.25rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: white;
+            color: #5a67d8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-option {
+            flex: 1;
+            padding: 0.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .upload-option.active {
+            border-color: #5a67d8;
+            background: rgba(90, 103, 216, 0.05);
+            color: #5a67d8;
+        }
+
+        .file-info {
+            background: rgba(90, 103, 216, 0.1);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #5a67d8;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+            .card-actions .btn {
+                width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .upload-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="container">
+        <div class="logo">
+            <h1>MyHost</h1>
+            <p>Platform Hosting HTML Gratis</p>
+        </div>
+
+        <div id="message"></div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('user')">User</button>
+            <button class="tab" onclick="switchTab('admin')">Admin</button>
+        </div>
+
+        <!-- User Login -->
+        <div id="userLogin">
+            <form id="userLoginForm">
+                <div class="form-group">
+                    <label for="username">Nama Pengguna:</label>
+                    <input type="text" id="username" required
+                        placeholder="Masukkan nama unik Anda (min 3 karakter, tanpa spasi)">
+                </div>
+                <button type="submit" class="btn">Masuk sebagai User</button>
+            </form>
+        </div>
+
+        <!-- Admin Login -->
+        <div id="adminLogin" class="hidden">
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="adminEmail">Email Admin:</label>
+                    <input type="email" id="adminEmail" required placeholder="admin@myhost.com">
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Password Admin:</label>
+                    <input type="password" id="adminPassword" required placeholder="Masukkan password admin">
+                </div>
+                <button type="submit" class="btn">Masuk sebagai Admin</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Dashboard -->
+    <div id="userDashboard" class="container dashboard hidden">
+        <div class="header">
+            <div>
+                <h2 style="color: #2d3748;">Dashboard User</h2>
+                <div class="user-info">
+                    <h3 id="userWelcome"></h3>
+                    <p>Website Anda: <span id="userWebsiteCount">0</span></p>
+                </div>
+            </div>
+            <button onclick="logout()" class="btn btn-secondary"
+                style="width: auto; padding: 0.5rem 1rem;">Keluar</button>
+        </div>
+
+        <div id="userMessage"></div>
+
+        <!-- Upload Form -->
+        <div class="website-card">
+            <h3 class="website-title">Upload Website Baru</h3>
+            
+            <div class="upload-options">
+                <div class="upload-option active" onclick="switchUploadMethod('file')">
+                    📁 Upload File HTML
+                </div>
+                <div class="upload-option" onclick="switchUploadMethod('text')">
+                    ✏️ Ketik Manual
+                </div>
+            </div>
+
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="websiteTitle">Judul Website:</label>
+                    <input type="text" id="websiteTitle" required placeholder="Nama website Anda">
+                </div>
+                
+                <!-- File Upload Method -->
+                <div id="fileUploadMethod" class="form-group">
+                    <label>Upload File HTML:</label>
+                    <div class="file-upload">
+                        <input type="file" id="htmlFile" accept=".html,.htm" onchange="handleFileSelect(event)">
+                        <label for="htmlFile" class="file-upload-label" id="fileLabel">
+                            📁 Pilih file HTML
+                        </label>
+                    </div>
+                    <div id="fileInfo" class="file-info hidden"></div>
+                </div>
+
+                <!-- Manual Text Method -->
+                <div id="textUploadMethod" class="form-group hidden">
+                    <label for="htmlContent">Kode HTML:</label>
+                    <textarea id="htmlContent" rows="10"
+                        placeholder="Paste kode HTML lengkap Anda di sini..."></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="uploadBtn">Upload Website</button>
+            </form>
+        </div>
+
+        <!-- User Websites -->
+        <h3 style="color: #2d3748; margin-bottom: 1rem;">Website Saya</h3>
+        <div id="userWebsites"></div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="container dashboard hidden">
+        <div class="header">
+            <div>
+                <h2 style="color: #2d3748;">Dashboard Admin</h2>
+                <div class="user-info">
+                    <h3>Panel Administrator</h3>
+                    <p>Total Pengguna: <span id="totalUsers">0</span> | Total Website: <span id="totalWebsites">0</span>
+                    </p>
+                </div>
+            </div>
+            <button onclick="logout()" class="btn btn-secondary"
+                style="width: auto; padding: 0.5rem 1rem;">Keluar</button>
+        </div>
+
+        <div id="adminMessage"></div>
+
+        <!-- All Websites -->
+        <h3 style="color: #2d3748; margin-bottom: 1rem;">Semua Website</h3>
+        <div id="allWebsites"></div>
+    </div>
+
+    <script>
+        // In-memory storage for demo (replace with actual backend)
+        let users = JSON.parse(localStorage.getItem('myhost_users') || '[]');
+        let websites = JSON.parse(localStorage.getItem('myhost_websites') || '[]');
+        let currentUser = null;
+        let isAdmin = false;
+        let currentUploadMethod = 'file';
+
+        // Admin credentials (in production, this should be server-side)
+        const ADMIN_EMAIL = 'admin@myhost.com';
+        const ADMIN_PASSWORD = 'admin123';
+
+        // Utility functions
+        function saveData() {
+            localStorage.setItem('myhost_users', JSON.stringify(users));
+            localStorage.setItem('myhost_websites', JSON.stringify(websites));
+        }
+
+        function showMessage(elementId, message, type = 'success') {
+            const messageDiv = document.getElementById(elementId);
+            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => messageDiv.innerHTML = '', 5000);
+        }
+
+        function generateWebsiteId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function validateUsername(username) {
+            const regex = /^[a-zA-Z0-9_-]{3,20}$/;
+            return regex.test(username) && !username.includes(' ');
+        }
+
+        function switchTab(tabType) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (tabType === 'user') {
+                document.getElementById('userLogin').classList.remove('hidden');
+                document.getElementById('adminLogin').classList.add('hidden');
+            } else {
+                document.getElementById('userLogin').classList.add('hidden');
+                document.getElementById('adminLogin').classList.remove('hidden');
+            }
+        }
+
+        function switchUploadMethod(method) {
+            currentUploadMethod = method;
+            
+            document.querySelectorAll('.upload-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (method === 'file') {
+                document.getElementById('fileUploadMethod').classList.remove('hidden');
+                document.getElementById('textUploadMethod').classList.add('hidden');
+            } else {
+                document.getElementById('fileUploadMethod').classList.add('hidden');
+                document.getElementById('textUploadMethod').classList.remove('hidden');
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const fileLabel = document.getElementById('fileLabel');
+            const fileInfo = document.getElementById('fileInfo');
+
+            if (file) {
+                if (file.type === 'text/html' || file.name.endsWith('.html') || file.name.endsWith('.htm')) {
+                    fileLabel.classList.add('has-file');
+                    fileLabel.innerHTML = `✅ ${file.name}`;
+                    
+                    fileInfo.innerHTML = `
+                        <strong>File dipilih:</strong> ${file.name}<br>
+                        <strong>Ukuran:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
+                        <strong>Tipe:</strong> ${file.type || 'text/html'}
+                    `;
+                    fileInfo.classList.remove('hidden');
+                } else {
+                    fileLabel.classList.remove('has-file');
+                    fileLabel.innerHTML = '❌ File harus berformat .html atau .htm';
+                    fileInfo.classList.add('hidden');
+                    event.target.value = '';
+                }
+            } else {
+                fileLabel.classList.remove('has-file');
+                fileLabel.innerHTML = '📁 Pilih file HTML';
+                fileInfo.classList.add('hidden');
+            }
+        }
+
+        // User login
+        document.getElementById('userLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+
+            if (!validateUsername(username)) {
+                showMessage('message', 'Nama pengguna harus 3-20 karakter, hanya huruf, angka, - dan _ (tanpa spasi)', 'error');
+                return;
+            }
+
+            // Check if user exists, if not create new user
+            let user = users.find(u => u.username === username);
+            if (!user) {
+                user = {
+                    username: username,
+                    createdAt: new Date().toISOString(),
+                    websiteCount: 0
+                };
+                users.push(user);
+                saveData();
+            }
+
+            currentUser = username;
+            isAdmin = false;
+            showUserDashboard();
+        });
+
+        // Admin login
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                currentUser = email;
+                isAdmin = true;
+                showAdminDashboard();
+            } else {
+                showMessage('message', 'Login admin gagal: Email atau password salah', 'error');
+            }
+        });
+
+        // Upload website
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('websiteTitle').value.trim();
+            let htmlContent = '';
+
+            if (!title) {
+                showMessage('userMessage', 'Judul website harus diisi', 'error');
+                return;
+            }
+
+            // Get content based on upload method
+            if (currentUploadMethod === 'file') {
+                const fileInput = document.getElementById('htmlFile');
+                if (!fileInput.files[0]) {
+                    showMessage('userMessage', 'Pilih file HTML untuk diupload', 'error');
+                    return;
+                }
+
+                try {
+                    htmlContent = await readFileContent(fileInput.files[0]);
+                } catch (error) {
+                    showMessage('userMessage', 'Gagal membaca file: ' + error.message, 'error');
+                    return;
+                }
+            } else {
+                htmlContent = document.getElementById('htmlContent').value.trim();
+                if (!htmlContent) {
+                    showMessage('userMessage', 'Konten HTML harus diisi', 'error');
+                    return;
+                }
+            }
+
+            // Basic HTML validation
+            if (!htmlContent.toLowerCase().includes('<html') && !htmlContent.toLowerCase().includes('<!doctype')) {
+                if (!confirm('File yang diupload sepertinya bukan HTML lengkap. Lanjutkan?')) {
+                    return;
+                }
+            }
+
+            try {
+                const websiteId = generateWebsiteId();
+                const website = {
+                    id: websiteId,
+                    title: title,
+                    content: htmlContent,
+                    owner: currentUser,
+                    createdAt: new Date().toISOString(),
+                    url: `${window.location.origin}/site/${websiteId}`
+                };
+
+                websites.push(website);
+
+                // Update user website count
+                const user = users.find(u => u.username === currentUser);
+                if (user) {
+                    user.websiteCount = (user.websiteCount || 0) + 1;
+                }
+
+                saveData();
+
+                showMessage('userMessage', `Website berhasil diupload! URL: ${website.url}`, 'success');
+                document.getElementById('uploadForm').reset();
+                document.getElementById('fileLabel').classList.remove('has-file');
+                document.getElementById('fileLabel').innerHTML = '📁 Pilih file HTML';
+                document.getElementById('fileInfo').classList.add('hidden');
+                loadUserWebsites();
+
+            } catch (error) {
+                showMessage('userMessage', 'Gagal mengupload website: ' + error.message, 'error');
+            }
+        });
+
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(new Error('Gagal membaca file'));
+                reader.readAsText(file);
+            });
+        }
+
+        // Show user dashboard
+        function showUserDashboard() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('userDashboard').classList.remove('hidden');
+            document.getElementById('userWelcome').textContent = `Selamat datang, ${currentUser}!`;
+            loadUserWebsites();
+        }
+
+        // Show admin dashboard
+        function showAdminDashboard() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            loadAdminData();
+        }
+
+        // Load user websites
+        function loadUserWebsites() {
+            const userWebsites = websites.filter(w => w.owner === currentUser);
+            const container = document.getElementById('userWebsites');
+            container.innerHTML = '';
+
+            document.getElementById('userWebsiteCount').textContent = userWebsites.length;
+
+            if (userWebsites.length === 0) {
+                container.innerHTML = '<div class="message">Belum ada website yang diupload</div>';
+                return;
+            }
+
+            userWebsites.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            userWebsites.forEach(website => {
+                const websiteCard = createWebsiteCard(website, false);
+                container.appendChild(websiteCard);
+            });
+        }
+
+        // Load admin data
+        function loadAdminData() {
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalWebsites').textContent = websites.length;
+
+            const container = document.getElementById('allWebsites');
+            container.innerHTML = '';
+
+            if (websites.length === 0) {
+                container.innerHTML = '<div class="message">Belum ada website yang diupload</div>';
+                return;
+            }
+
+            const sortedWebsites = websites.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            sortedWebsites.forEach(website => {
+                const websiteCard = createWebsiteCard(website, true);
+                container.appendChild(websiteCard);
+            });
+        }
+
+        // Create website card
+        function createWebsiteCard(website, isAdminView) {
+            const card = document.createElement('div');
+            card.className = 'website-card';
+
+            const ownerInfo = isAdminView ? `<p style="color: #718096; font-size: 0.9rem; margin-bottom: 0.5rem;">Pemilik: ${website.owner}</p>` : '';
+            const createdDate = new Date(website.createdAt).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            card.innerHTML = `
+                <div class="website-title">${website.title}</div>
+                ${ownerInfo}
+                <p style="color: #718096; font-size: 0.8rem; margin-bottom: 0.5rem;">Dibuat: ${createdDate}</p>
+                <a href="javascript:void(0)" onclick="openWebsite('${website.id}')" class="website-url">
+                    ${website.url}
+                </a>
+                <div class="card-actions">
+                    <button onclick="openWebsite('${website.id}')" class="btn">Preview</button>
+                    <button onclick="viewSource('${website.id}')" class="btn btn-secondary">Lihat Kode</button>
+                    <button onclick="downloadWebsite('${website.id}')" class="btn btn-secondary">Download</button>
+                    <button onclick="deleteWebsite('${website.id}', '${isAdminView ? 'admin' : 'user'}')" class="btn btn-danger">Hapus</button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Open website in new window
+        function openWebsite(websiteId) {
+            const website = websites.find(w => w.id === websiteId);
+            if (website) {
+                const newWindow = window.open('', '_blank', 'width=1200,height=800');
+                newWindow.document.write(website.content);
+                newWindow.document.close();
+            }
+        }
+
+        // View source code
+        function viewSource(websiteId) {
+            const website = websites.find(w => w.id === websiteId);
+            if (website) {
+                const newWindow = window.open('', '_blank', 'width=800,height=600');
+                newWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Source: ${website.title}</title>
+                            <style>
+                                body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+                                pre { background: white; padding: 15px; border-radius: 5px; overflow: auto; border: 1px solid #ddd; }
+                                .header { background: white; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ddd; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="header">
+                                <h2>${website.title}</h2>
+                                <p><strong>Pemilik:</strong> ${website.owner}</p>
+                                <p><strong>Dibuat:</strong> ${new Date(website.createdAt).toLocaleString('id-ID')}</p>
+                            </div>
+                            <pre>${website.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                        </body>
+                    </html>
+                `);
+            }
+        }
+
+        // Download website
+        function downloadWebsite(websiteId) {
+            const website = websites.find(w => w.id === websiteId);
+            if (website) {
+                const blob = new Blob([website.content], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${website.title.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Delete website
+        function deleteWebsite(websiteId, dashboardType) {
+            if (!confirm('Apakah Anda yakin ingin menghapus website ini?')) {
+                return;
+            }
+
+            const websiteIndex = websites.findIndex(w => w.id === websiteId);
+            if (websiteIndex !== -1) {
+                const website = websites[websiteIndex];
+                websites.splice(websiteIndex, 1);
+
+                // Update user website count
+                const user = users.find(u => u.username === website.owner);
+                if (user) {
+                    user.websiteCount = Math.max((user.websiteCount || 1) - 1, 0);
+                }
+
+                saveData();
+
+                const messageId = dashboardType === 'admin' ? 'adminMessage' : 'userMessage';
+                showMessage(messageId, 'Website berhasil dihapus', 'success');
+
+                // Reload data
+                if (dashboardType === 'admin') {
+                    loadAdminData();
+                } else {
+                    loadUserWebsites();
+                }
+            }
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            isAdmin = false;
+
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+
+            // Reset forms
+            document.getElementById('userLoginForm').reset();
+            document.getElementById('adminLoginForm').reset();
+            document.getElementById('uploadForm').reset();
+
+            // Reset file upload UI
+            document.getElementById('fileLabel').classList.remove('has-file');
+            document.getElementById('fileLabel').innerHTML = '📁 Pilih file HTML';
+            document.getElementById('fileInfo').classList.add('hidden');
+
+            // Clear messages
+            document.getElementById('message').innerHTML = '';
+            document.getElementById('userMessage').innerHTML = '';
+            document.getElementById('adminMessage').innerHTML = '';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load sample data if none exists
+            if (users.length === 0) {
+                // Add sample user
+                users.push({
+                    username: 'demo',
+                    createdAt: new Date().toISOString(),
+                    websiteCount: 1
+                });
+
+                // Add sample website
+                websites.push({
+                    id: 'sample001',
+                    title: 'Website Demo',
+                    content: `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 { color: #2d3436; margin-bottom: 1rem; }
+        p { color: #636e72; line-height: 1.6; }
+        .btn {
+            background: #00b894;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 16px;
+        }
+        .btn:hover { background: #00a085; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Selamat Datang di MyHost!</h1>
+        <p>Ini adalah contoh website yang dihosting menggunakan platform MyHost.</p>
+        <p>Anda dapat mengupload file HTML Anda sendiri dan melihat hasilnya langsung di sini.</p>
+        <button class="btn" onclick="alert('Hello dari MyHost!')">Klik Saya!</button>
+        <br><br>
+        <small>Dibuat dengan ❤️ menggunakan MyHost</small>
+    </div>
+</body>
+</html>`,
+                    owner: 'demo',
+                    createdAt: new Date().toISOString(),
+                    url: `${window.location.origin}/site/sample001`
+                });
+
+                saveData();
+            }
+        });
+    </script>
+</body>
+
+</html>
