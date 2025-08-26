@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HostFree - Hosting Sederhana</title>
+    <title>FireHost - Hosting Sederhana</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -265,7 +265,7 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo">HostFree</div>
+                <div class="logo">FireHost</div>
                 <div class="hamburger" role="button" aria-label="Toggle navigation">☰</div>
                 <div class="nav-links" id="nav-links">
                     <a href="#" id="home-link" aria-current="page">Beranda</a>
@@ -282,8 +282,8 @@
         <!-- Halaman Beranda -->
         <div id="home-page">
             <div class="card">
-                <h1>Selamat Datang di HostFree</h1>
-                <p>Platform hosting sederhana untuk website HTML Anda. Daftar sekarang dan mulai unggah kode HTML Anda untuk dihosting secara gratis!</p>
+                <h1>Selamat Datang di FireHost</h1>
+                <p>Platform hosting sederhana untuk website HTML Anda. Daftar sekarang dan mulai unggah kode HTML Anda untuk dihosted secara gratis!</p>
                 <p>Fitur:</p>
                 <ul>
                     <li>Hosting kode HTML tanpa batas</li>
@@ -361,10 +361,23 @@
     </div>
     <footer>
         <div class="container">
-            <p>&copy; 2025 HostFree - Hosting Sederhana dengan Firebase</p>
+            <p>&copy; 2025 FireHost - Hosting Sederhana dengan Firebase</p>
         </div>
     </footer>
     <script>
+        // Disable right-click and developer tools shortcuts
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('keydown', (e) => {
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.key === 'u')
+            ) {
+                e.preventDefault();
+            }
+        });
+
         // Konfigurasi Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAcwGj4DNCxtbgF73Szv54YZwh-fMse8lA",
@@ -458,6 +471,11 @@
             return div.innerHTML;
         }
 
+        // Fungsi untuk decode Base64
+        function decodePassword(encoded) {
+            return atob(encoded);
+        }
+
         // Fungsi untuk login
         function login(username) {
             if (!username || username.length < 3) {
@@ -472,8 +490,9 @@
                         currentUser = userData;
 
                         if (username === "hengki") {
+                            const encodedPassword = "aGVuZ2tpMTQxNTE2";
                             const password = prompt("Masukkan password admin:");
-                            if (password !== "hengki141516") {
+                            if (password !== decodePassword(encodedPassword)) {
                                 showAlert(loginAlert, 'error', 'Password admin salah');
                                 return;
                             }
