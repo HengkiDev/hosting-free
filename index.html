@@ -1,954 +1,988 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyHost - HTML Hosting Platform</title>
+    <title>FireHost - Hosting Sederhana</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+            transition: all 0.3s ease;
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            width: 90%;
-            max-width: 500px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
         }
 
         .logo {
-            text-align: center;
-            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            font-weight: bold;
         }
 
-        .logo h1 {
-            color: #5a67d8;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+        .nav-links {
+            display: flex;
+            gap: 20px;
         }
 
-        .logo p {
-            color: #718096;
-            font-size: 1rem;
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .main-content {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            color: var(--secondary);
         }
 
         .form-group {
             margin-bottom: 1.5rem;
         }
 
-        .form-group label {
+        label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #2d3748;
-            font-weight: 600;
+            font-weight: 500;
         }
 
-        .form-group input,
-        .form-group textarea {
+        input[type="text"],
+        input[type="file"],
+        textarea {
             width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             font-size: 1rem;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #5a67d8;
-            box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
+        textarea {
+            min-height: 200px;
+            font-family: monospace;
+            resize: vertical;
         }
 
-        .file-upload {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-upload input[type="file"] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-upload-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 1rem;
-            border: 2px dashed #5a67d8;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(90, 103, 216, 0.05);
-            color: #5a67d8;
-            font-weight: 600;
-        }
-
-        .file-upload-label:hover {
-            background: rgba(90, 103, 216, 0.1);
-            border-color: #4c51bf;
-        }
-
-        .file-upload-label.has-file {
-            border-color: #38a169;
-            background: rgba(72, 187, 120, 0.05);
-            color: #38a169;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: linear-gradient(135deg, #5a67d8, #667eea);
+        button {
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s;
         }
 
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(90, 103, 216, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #718096, #4a5568);
+        button:hover {
+            background: var(--secondary);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #e53e3e, #c53030);
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #d1146a;
         }
 
         .hidden {
             display: none;
         }
 
-        .dashboard {
-            max-width: 900px;
-            width: 95%;
+        .website-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .website-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        .website-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .website-title {
-            color: #2d3748;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .website-url {
-            color: #5a67d8;
-            text-decoration: none;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-bottom: 1rem;
-        }
-
-        .website-url:hover {
-            text-decoration: underline;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .card-actions .btn {
-            flex: 1;
-            min-width: 100px;
-            margin-bottom: 0;
-            padding: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .message {
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .message.success {
-            background: rgba(72, 187, 120, 0.1);
-            color: #38a169;
-            border: 1px solid rgba(72, 187, 120, 0.3);
-        }
-
-        .message.error {
-            background: rgba(229, 62, 62, 0.1);
-            color: #e53e3e;
-            border: 1px solid rgba(229, 62, 62, 0.3);
-        }
-
-        .user-info {
-            background: rgba(90, 103, 216, 0.1);
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .user-info h3 {
-            color: #5a67d8;
-            margin-bottom: 0.5rem;
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 2rem;
-            background: rgba(226, 232, 240, 0.5);
-            border-radius: 10px;
-            padding: 0.25rem;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 0.75rem;
-            background: transparent;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #4a5568;
-            font-weight: 600;
-        }
-
-        .tab.active {
+        .website-item {
             background: white;
-            color: #5a67d8;
+            border-radius: 8px;
+            padding: 15px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
         }
 
-        .upload-options {
+        .website-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .website-item h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .website-actions {
             display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        .upload-option {
-            flex: 1;
-            padding: 0.5rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        footer {
+            background: var(--dark);
+            color: white;
             text-align: center;
-            transition: all 0.3s ease;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
         }
 
-        .upload-option.active {
-            border-color: #5a67d8;
-            background: rgba(90, 103, 216, 0.05);
-            color: #5a67d8;
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--secondary);
+                padding: 1rem;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .website-list {
+                grid-template-columns: 1fr;
+            }
+
+            button, input, textarea {
+                font-size: 0.9rem;
+            }
         }
 
-        .file-info {
-            background: rgba(90, 103, 216, 0.1);
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: #5a67d8;
-        }
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.4rem;
+            }
 
-        @media (max-width: 640px) {
             .container {
-                margin: 1rem;
-                padding: 1.5rem;
+                padding: 0 10px;
             }
 
-            .card-actions {
-                flex-direction: column;
-            }
-
-            .card-actions .btn {
-                width: 100%;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .upload-options {
-                flex-direction: column;
+            .website-item {
+                padding: 10px;
             }
         }
     </style>
 </head>
-
 <body>
-    <!-- Login Form -->
-    <div id="loginForm" class="container">
-        <div class="logo">
-            <h1>MyHost</h1>
-            <p>Platform Hosting HTML Gratis</p>
-        </div>
-
-        <div id="message"></div>
-
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('user')">User</button>
-            <button class="tab" onclick="switchTab('admin')">Admin</button>
-        </div>
-
-        <!-- User Login -->
-        <div id="userLogin">
-            <form id="userLoginForm">
-                <div class="form-group">
-                    <label for="username">Nama Pengguna:</label>
-                    <input type="text" id="username" required
-                        placeholder="Masukkan nama unik Anda (min 3 karakter, tanpa spasi)">
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">FireHost</div>
+                <div class="hamburger" role="button" aria-label="Toggle navigation">☰</div>
+                <div class="nav-links" id="nav-links">
+                    <a href="#" id="home-link" aria-current="page">Beranda</a>
+                    <a href="#" id="login-link" class="hidden">Login</a>
+                    <a href="#" id="register-link" class="hidden">Daftar</a>
+                    <a href="#" id="dashboard-link" class="hidden">Dashboard</a>
+                    <a href="#" id="admin-link" class="hidden">Admin</a>
+                    <a href="#" id="logout-link" class="hidden">Logout</a>
                 </div>
-                <button type="submit" class="btn">Masuk sebagai User</button>
-            </form>
+            </nav>
         </div>
-
-        <!-- Admin Login -->
-        <div id="adminLogin" class="hidden">
-            <form id="adminLoginForm">
+    </header>
+    <div class="container main-content">
+        <!-- Halaman Beranda -->
+        <div id="home-page">
+            <div class="card">
+                <h1>Selamat Datang di FireHost</h1>
+                <p>Platform hosting sederhana untuk website HTML Anda. Daftar sekarang dan mulai unggah kode HTML Anda untuk dihosting secara gratis!</p>
+                <p>Fitur:</p>
+                <ul>
+                    <li>Hosting kode HTML tanpa batas</li>
+                    <li>Link unik untuk setiap website</li>
+                    <li>Antarmuka yang mudah digunakan</li>
+                    <li>Unggah file HTML langsung</li>
+                </ul>
+            </div>
+        </div>
+        <!-- Halaman Login -->
+        <div id="login-page" class="hidden">
+            <div class="card">
+                <h2>Login ke Akun Anda</h2>
+                <div id="login-alert"></div>
                 <div class="form-group">
-                    <label for="adminEmail">Email Admin:</label>
-                    <input type="email" id="adminEmail" required placeholder="admin@myhost.com">
+                    <label for="login-username">Nama Pengguna</label>
+                    <input type="text" id="login-username" placeholder="Masukkan nama pengguna" aria-required="true">
+                </div>
+                <button id="login-btn">Login</button>
+            </div>
+        </div>
+        <!-- Halaman Daftar -->
+        <div id="register-page" class="hidden">
+            <div class="card">
+                <h2>Buat Akun Baru</h2>
+                <div id="register-alert"></div>
+                <div class="form-group">
+                    <label for="register-username">Nama Pengguna</label>
+                    <input type="text" id="register-username" placeholder="Pilih nama pengguna (minimal 3 karakter)" aria-required="true">
+                    <small>Nama pengguna hanya boleh mengandung huruf, angka, dan underscore</small>
+                </div>
+                <button id="register-btn">Daftar</button>
+            </div>
+        </div>
+        <!-- Halaman Dashboard Pengguna -->
+        <div id="dashboard-page" class="hidden">
+            <div class="card">
+                <h2>Dashboard Pengguna</h2>
+                <p>Selamat datang, <span id="user-name"></span>!</p>
+                <h3>Unggah Website Baru</h3>
+                <div id="upload-alert"></div>
+                <div class="form-group">
+                    <label for="website-name">Nama Website</label>
+                    <input type="text" id="website-name" placeholder="Masukkan nama website" aria-required="true">
                 </div>
                 <div class="form-group">
-                    <label for="adminPassword">Password Admin:</label>
-                    <input type="password" id="adminPassword" required placeholder="Masukkan password admin">
+                    <label for="website-file">Unggah File HTML</label>
+                    <input type="file" id="website-file" accept=".html" aria-describedby="file-help">
+                    <small id="file-help">Pilih file HTML untuk diunggah</small>
                 </div>
-                <button type="submit" class="btn">Masuk sebagai Admin</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- User Dashboard -->
-    <div id="userDashboard" class="container dashboard hidden">
-        <div class="header">
-            <div>
-                <h2 style="color: #2d3748;">Dashboard User</h2>
-                <div class="user-info">
-                    <h3 id="userWelcome"></h3>
-                    <p>Website Anda: <span id="userWebsiteCount">0</span></p>
+                <div class="form-group">
+                    <label for="website-html">Kode HTML</label>
+                    <textarea id="website-html" placeholder="Masukkan kode HTML Anda di sini atau unggah file di atas" aria-required="true"></textarea>
+                </div>
+                <button id="upload-btn">Unggah Website</button>
+            </div>
+            <div class="card">
+                <h3>Website Saya</h3>
+                <div id="websites-list" class="website-list">
+                    <!-- Daftar website akan dimuat di sini -->
                 </div>
             </div>
-            <button onclick="logout()" class="btn btn-secondary"
-                style="width: auto; padding: 0.5rem 1rem;">Keluar</button>
         </div>
-
-        <div id="userMessage"></div>
-
-        <!-- Upload Form -->
-        <div class="website-card">
-            <h3 class="website-title">Upload Website Baru</h3>
-            
-            <div class="upload-options">
-                <div class="upload-option active" onclick="switchUploadMethod('file')">
-                    📁 Upload File HTML
-                </div>
-                <div class="upload-option" onclick="switchUploadMethod('text')">
-                    ✏️ Ketik Manual
+        <!-- Halaman Admin -->
+        <div id="admin-page" class="hidden">
+            <div class="card">
+                <h2>Panel Admin</h2>
+                <p>Halaman ini hanya dapat diakses oleh administrator.</p>
+                <h3>Daftar Pengguna</h3>
+                <div id="users-list">
+                    <!-- Daftar pengguna akan dimuat di sini -->
                 </div>
             </div>
-
-            <form id="uploadForm">
-                <div class="form-group">
-                    <label for="websiteTitle">Judul Website:</label>
-                    <input type="text" id="websiteTitle" required placeholder="Nama website Anda">
-                </div>
-                
-                <!-- File Upload Method -->
-                <div id="fileUploadMethod" class="form-group">
-                    <label>Upload File HTML:</label>
-                    <div class="file-upload">
-                        <input type="file" id="htmlFile" accept=".html,.htm" onchange="handleFileSelect(event)">
-                        <label for="htmlFile" class="file-upload-label" id="fileLabel">
-                            📁 Pilih file HTML
-                        </label>
-                    </div>
-                    <div id="fileInfo" class="file-info hidden"></div>
-                </div>
-
-                <!-- Manual Text Method -->
-                <div id="textUploadMethod" class="form-group hidden">
-                    <label for="htmlContent">Kode HTML:</label>
-                    <textarea id="htmlContent" rows="10"
-                        placeholder="Paste kode HTML lengkap Anda di sini..."></textarea>
-                </div>
-
-                <button type="submit" class="btn" id="uploadBtn">Upload Website</button>
-            </form>
         </div>
-
-        <!-- User Websites -->
-        <h3 style="color: #2d3748; margin-bottom: 1rem;">Website Saya</h3>
-        <div id="userWebsites"></div>
     </div>
-
-    <!-- Admin Dashboard -->
-    <div id="adminDashboard" class="container dashboard hidden">
-        <div class="header">
-            <div>
-                <h2 style="color: #2d3748;">Dashboard Admin</h2>
-                <div class="user-info">
-                    <h3>Panel Administrator</h3>
-                    <p>Total Pengguna: <span id="totalUsers">0</span> | Total Website: <span id="totalWebsites">0</span>
-                    </p>
-                </div>
-            </div>
-            <button onclick="logout()" class="btn btn-secondary"
-                style="width: auto; padding: 0.5rem 1rem;">Keluar</button>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 FireHost - Hosting Sederhana dengan Firebase</p>
         </div>
-
-        <div id="adminMessage"></div>
-
-        <!-- All Websites -->
-        <h3 style="color: #2d3748; margin-bottom: 1rem;">Semua Website</h3>
-        <div id="allWebsites"></div>
-    </div>
-
+    </footer>
     <script>
-        // In-memory storage for demo (replace with actual backend)
-        let users = JSON.parse(localStorage.getItem('myhost_users') || '[]');
-        let websites = JSON.parse(localStorage.getItem('myhost_websites') || '[]');
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcwGj4DNCxtbgF73Szv54YZwh-fMse8lA",
+            authDomain: "hosting-a3cf1.firebaseapp.com",
+            databaseURL: "https://hosting-a3cf1-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hosting-a3cf1",
+            storageBucket: "hosting-a3cf1.firebasestorage.app",
+            messagingSenderId: "65851407729",
+            appId: "1:65851407729:web:439e00b8e48cadf22c0ad0",
+            measurementId: "G-GRVKW11616"
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Elemen DOM
+        const homePage = document.getElementById('home-page');
+        const loginPage = document.getElementById('login-page');
+        const registerPage = document.getElementById('register-page');
+        const dashboardPage = document.getElementById('dashboard-page');
+        const adminPage = document.getElementById('admin-page');
+        const navLinks = document.getElementById('nav-links');
+        const hamburger = document.querySelector('.hamburger');
+
+        const homeLink = document.getElementById('home-link');
+        const loginLink = document.getElementById('login-link');
+        const registerLink = document.getElementById('register-link');
+        const dashboardLink = document.getElementById('dashboard-link');
+        const adminLink = document.getElementById('admin-link');
+        const logoutLink = document.getElementById('logout-link');
+
+        const loginUsername = document.getElementById('login-username');
+        const loginBtn = document.getElementById('login-btn');
+        const loginAlert = document.getElementById('login-alert');
+
+        const registerUsername = document.getElementById('register-username');
+        const registerBtn = document.getElementById('register-btn');
+        const registerAlert = document.getElementById('register-alert');
+
+        const userName = document.getElementById('user-name');
+        const websiteName = document.getElementById('website-name');
+        const websiteFile = document.getElementById('website-file');
+        const websiteHtml = document.getElementById('website-html');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadAlert = document.getElementById('upload-alert');
+        const websitesList = document.getElementById('websites-list');
+
+        const usersList = document.getElementById('users-list');
+
+        // State aplikasi
         let currentUser = null;
         let isAdmin = false;
-        let currentUploadMethod = 'file';
 
-        // Admin credentials (in production, this should be server-side)
-        const ADMIN_EMAIL = 'admin@myhost.com';
-        const ADMIN_PASSWORD = 'admin123';
-
-        // Utility functions
-        function saveData() {
-            localStorage.setItem('myhost_users', JSON.stringify(users));
-            localStorage.setItem('myhost_websites', JSON.stringify(websites));
+        // Fungsi untuk menampilkan halaman dengan animasi
+        function showPage(page) {
+            const pages = [homePage, loginPage, registerPage, dashboardPage, adminPage];
+            pages.forEach(p => p.classList.add('hidden'));
+            page.classList.remove('hidden');
+            page.style.opacity = '0';
+            setTimeout(() => {
+                page.style.transition = 'opacity 0.3s ease';
+                page.style.opacity = '1';
+            }, 10);
         }
 
-        function showMessage(elementId, message, type = 'success') {
-            const messageDiv = document.getElementById(elementId);
-            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
-            setTimeout(() => messageDiv.innerHTML = '', 5000);
-        }
-
-        function generateWebsiteId() {
-            return Math.random().toString(36).substr(2, 9);
-        }
-
-        function validateUsername(username) {
-            const regex = /^[a-zA-Z0-9_-]{3,20}$/;
-            return regex.test(username) && !username.includes(' ');
-        }
-
-        function switchTab(tabType) {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            if (tabType === 'user') {
-                document.getElementById('userLogin').classList.remove('hidden');
-                document.getElementById('adminLogin').classList.add('hidden');
+        // Fungsi untuk update UI berdasarkan status auth
+        function updateUI(user) {
+            if (user) {
+                loginLink.classList.add('hidden');
+                registerLink.classList.add('hidden');
+                dashboardLink.classList.remove('hidden');
+                logoutLink.classList.remove('hidden');
+                adminLink.classList.toggle('hidden', !isAdmin);
             } else {
-                document.getElementById('userLogin').classList.add('hidden');
-                document.getElementById('adminLogin').classList.remove('hidden');
+                loginLink.classList.remove('hidden');
+                registerLink.classList.remove('hidden');
+                dashboardLink.classList.add('hidden');
+                adminLink.classList.add('hidden');
+                logoutLink.classList.add('hidden');
+                showPage(homePage);
             }
+            navLinks.classList.remove('active');
         }
 
-        function switchUploadMethod(method) {
-            currentUploadMethod = method;
-            
-            document.querySelectorAll('.upload-option').forEach(option => {
-                option.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            if (method === 'file') {
-                document.getElementById('fileUploadMethod').classList.remove('hidden');
-                document.getElementById('textUploadMethod').classList.add('hidden');
-            } else {
-                document.getElementById('fileUploadMethod').classList.add('hidden');
-                document.getElementById('textUploadMethod').classList.remove('hidden');
-            }
+        // Fungsi untuk sanitasi HTML (mencegah XSS)
+        function sanitizeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            const fileLabel = document.getElementById('fileLabel');
-            const fileInfo = document.getElementById('fileInfo');
-
-            if (file) {
-                if (file.type === 'text/html' || file.name.endsWith('.html') || file.name.endsWith('.htm')) {
-                    fileLabel.classList.add('has-file');
-                    fileLabel.innerHTML = `✅ ${file.name}`;
-                    
-                    fileInfo.innerHTML = `
-                        <strong>File dipilih:</strong> ${file.name}<br>
-                        <strong>Ukuran:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
-                        <strong>Tipe:</strong> ${file.type || 'text/html'}
-                    `;
-                    fileInfo.classList.remove('hidden');
-                } else {
-                    fileLabel.classList.remove('has-file');
-                    fileLabel.innerHTML = '❌ File harus berformat .html atau .htm';
-                    fileInfo.classList.add('hidden');
-                    event.target.value = '';
-                }
-            } else {
-                fileLabel.classList.remove('has-file');
-                fileLabel.innerHTML = '📁 Pilih file HTML';
-                fileInfo.classList.add('hidden');
-            }
-        }
-
-        // User login
-        document.getElementById('userLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-
-            if (!validateUsername(username)) {
-                showMessage('message', 'Nama pengguna harus 3-20 karakter, hanya huruf, angka, - dan _ (tanpa spasi)', 'error');
+        // Fungsi untuk login
+        function login(username) {
+            if (!username || username.length < 3) {
+                showAlert(loginAlert, 'error', 'Nama pengguna harus minimal 3 karakter');
                 return;
             }
 
-            // Check if user exists, if not create new user
-            let user = users.find(u => u.username === username);
-            if (!user) {
-                user = {
-                    username: username,
-                    createdAt: new Date().toISOString(),
-                    websiteCount: 0
-                };
-                users.push(user);
-                saveData();
+            database.ref('users').orderByChild('username').equalTo(username).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const userData = Object.values(snapshot.val())[0];
+                        currentUser = userData;
+
+                        if (username === "hengki") {
+                            const password = prompt("Masukkan password admin:");
+                            if (password !== "hengki141516") {
+                                showAlert(loginAlert, 'error', 'Password admin salah');
+                                return;
+                            }
+                            isAdmin = true;
+                        } else {
+                            isAdmin = false;
+                        }
+
+                        updateUI(currentUser);
+                        userName.textContent = userData.username;
+                        showPage(dashboardPage);
+                        loadUserWebsites(userData.uid);
+                        loginUsername.value = '';
+                        loginAlert.innerHTML = '';
+                    } else {
+                        showAlert(loginAlert, 'error', 'Nama pengguna tidak ditemukan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during login:', error);
+                    showAlert(loginAlert, 'error', 'Terjadi kesalahan saat login');
+                });
+        }
+
+        // Fungsi untuk registrasi
+        function register(username) {
+            if (!username || username.length < 3) {
+                showAlert(registerAlert, 'error', 'Nama pengguna harus minimal 3 karakter');
+                return;
             }
 
-            currentUser = username;
-            isAdmin = false;
-            showUserDashboard();
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            if (!usernameRegex.test(username)) {
+                showAlert(registerAlert, 'error', 'Nama pengguna hanya boleh mengandung huruf, angka, dan underscore');
+                return;
+            }
+
+            database.ref('users').orderByChild('username').equalTo(username).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        showAlert(registerAlert, 'error', 'Nama pengguna sudah digunakan');
+                    } else {
+                        const uid = generateUID();
+                        const userData = {
+                            uid: uid,
+                            username: username,
+                            createdAt: Date.now()
+                        };
+
+                        database.ref('users/' + uid).set(userData)
+                            .then(() => {
+                                showAlert(registerAlert, 'success', 'Pendaftaran berhasil! Silakan login');
+                                registerUsername.value = '';
+                                setTimeout(() => showPage(loginPage), 2000);
+                            })
+                            .catch(error => {
+                                console.error('Error saving user:', error);
+                                showAlert(registerAlert, 'error', 'Terjadi kesalahan saat mendaftar');
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking username:', error);
+                    showAlert(registerAlert, 'error', 'Terjadi kesalahan saat mendaftar');
+                });
+        }
+
+        // Fungsi untuk mengunggah website
+        function uploadWebsite() {
+            const name = websiteName.value.trim();
+            const html = websiteHtml.value.trim();
+
+            if (!name) {
+                showAlert(uploadAlert, 'error', 'Nama website harus diisi');
+                return;
+            }
+
+            if (!html) {
+                showAlert(uploadAlert, 'error', 'Kode HTML harus diisi');
+                return;
+            }
+
+            const websiteId = generateUID();
+            const websiteData = {
+                id: websiteId,
+                name: sanitizeHTML(name),
+                html: html, // Sanitasi dilakukan saat rendering
+                owner: currentUser.uid,
+                ownerName: currentUser.username,
+                createdAt: Date.now(),
+                url: `${window.location.origin}${window.location.pathname}?website=${websiteId}`
+            };
+
+            database.ref('websites/' + websiteId).set(websiteData)
+                .then(() => {
+                    database.ref('userWebsites/' + currentUser.uid + '/' + websiteId).set(true)
+                        .then(() => {
+                            showAlert(uploadAlert, 'success', 'Website berhasil diunggah!');
+                            websiteName.value = '';
+                            websiteHtml.value = '';
+                            websiteFile.value = '';
+                            loadUserWebsites(currentUser.uid);
+                        })
+                        .catch(error => {
+                            console.error('Error saving user website reference:', error);
+                            showAlert(uploadAlert, 'error', 'Terjadi kesalahan saat mengunggah website');
+                        });
+                })
+                .catch(error => {
+                    console.error('Error saving website:', error);
+                    showAlert(uploadAlert, 'error', 'Terjadi kesalahan saat mengunggah website');
+                });
+        }
+
+        // Fungsi untuk membaca file HTML
+        websiteFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file || !file.name.endsWith('.html')) {
+                showAlert(uploadAlert, 'error', 'Harap pilih file HTML');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                websiteHtml.value = event.target.result;
+            };
+            reader.onerror = () => {
+                showAlert(uploadAlert, 'error', 'Gagal membaca file HTML');
+            };
+            reader.readAsText(file);
         });
 
-        // Admin login
-        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
+        // Fungsi untuk memuat website pengguna
+        function loadUserWebsites(uid) {
+            websitesList.innerHTML = '<p>Memuat website...</p>';
+            database.ref('userWebsites/' + uid).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const websiteIds = Object.keys(snapshot.val());
+                        if (websiteIds.length === 0) {
+                            websitesList.innerHTML = '<p>Anda belum memiliki website.</p>';
+                            return;
+                        }
 
-            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-                currentUser = email;
-                isAdmin = true;
-                showAdminDashboard();
-            } else {
-                showMessage('message', 'Login admin gagal: Email atau password salah', 'error');
+                        const websitePromises = websiteIds.map(id =>
+                            database.ref('websites/' + id).once('value').then(s => s.val())
+                        );
+
+                        Promise.all(websitePromises)
+                            .then(websites => displayWebsites(websites))
+                            .catch(error => {
+                                console.error('Error loading websites:', error);
+                                websitesList.innerHTML = '<p>Terjadi kesalahan saat memuat website.</p>';
+                            });
+                    } else {
+                        websitesList.innerHTML = '<p>Anda belum memiliki website.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user websites:', error);
+                    websitesList.innerHTML = '<p>Terjadi kesalahan saat memuat website.</p>';
+                });
+        }
+
+        // Fungsi untuk menampilkan daftar website
+        function displayWebsites(websites) {
+            websitesList.innerHTML = '';
+            websites.forEach(website => {
+                if (!website) return;
+                const websiteElement = document.createElement('div');
+                websiteElement.className = 'website-item';
+                websiteElement.innerHTML = `
+                    <h3>${sanitizeHTML(website.name)}</h3>
+                    <p>Dibuat: ${new Date(website.createdAt).toLocaleDateString('id-ID')}</p>
+                    <p>URL: <a href="${website.url}" target="_blank">${website.url}</a></p>
+                    <div class="website-actions">
+                        <button class="view-website" data-id="${website.id}">Lihat</button>
+                        <button class="delete-website" data-id="${website.id}">Hapus</button>
+                    </div>
+                `;
+                websitesList.appendChild(websiteElement);
+            });
+
+            document.querySelectorAll('.view-website').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const websiteId = e.target.getAttribute('data-id');
+                    window.open(`?website=${websiteId}`, '_blank');
+                });
+            });
+
+            document.querySelectorAll('.delete-website').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const websiteId = e.target.getAttribute('data-id');
+                    deleteWebsite(websiteId);
+                });
+            });
+        }
+
+        // Fungsi untuk menghapus website
+        function deleteWebsite(websiteId) {
+            if (confirm('Apakah Anda yakin ingin menghapus website ini?')) {
+                database.ref('websites/' + websiteId).remove()
+                    .then(() => {
+                        database.ref('userWebsites/' + currentUser.uid + '/' + websiteId).remove()
+                            .then(() => {
+                                showAlert(uploadAlert, 'success', 'Website berhasil dihapus');
+                                loadUserWebsites(currentUser.uid);
+                            })
+                            .catch(error => {
+                                console.error('Error removing user website reference:', error);
+                                showAlert(uploadAlert, 'error', 'Terjadi kesalahan saat menghapus website');
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Error removing website:', error);
+                        showAlert(uploadAlert, 'error', 'Terjadi kesalahan saat menghapus website');
+                    });
             }
-        });
+        }
 
-        // Upload website
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('websiteTitle').value.trim();
-            let htmlContent = '';
+        // Fungsi untuk memuat halaman admin
+        function loadAdminPage() {
+            usersList.innerHTML = '<p>Memuat data pengguna...</p>';
+            database.ref('users').once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const users = Object.values(snapshot.val());
+                        displayUsers(users);
+                    } else {
+                        usersList.innerHTML = '<p>Tidak ada pengguna terdaftar.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading users:', error);
+                    usersList.innerHTML = '<p>Terjadi kesalahan saat memuat data pengguna.</p>';
+                });
+        }
 
-            if (!title) {
-                showMessage('userMessage', 'Judul website harus diisi', 'error');
+        // Fungsi untuk menampilkan daftar pengguna
+        function displayUsers(users) {
+            usersList.innerHTML = '';
+            users.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.className = 'website-item';
+                userElement.innerHTML = `
+                    <h3>${sanitizeHTML(user.username)}</h3>
+                    <p>ID: ${user.uid}</p>
+                    <p>Bergabung: ${new Date(user.createdAt).toLocaleDateString('id-ID')}</p>
+                    <div class="website-actions">
+                        <button class="view-user-websites" data-uid="${user.uid}">Lihat Website</button>
+                        <button class="delete-user" data-uid="${user.uid}">Hapus Pengguna</button>
+                    </div>
+                    <div class="user-websites" id="websites-${user.uid}"></div>
+                `;
+                usersList.appendChild(userElement);
+            });
+
+            document.querySelectorAll('.view-user-websites').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const userId = e.target.getAttribute('data-uid');
+                    toggleUserWebsites(userId);
+                });
+            });
+
+            document.querySelectorAll('.delete-user').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const userId = e.target.getAttribute('data-uid');
+                    deleteUser(userId);
+                });
+            });
+        }
+
+        // Fungsi untuk menampilkan/sembunyikan website pengguna
+        function toggleUserWebsites(userId) {
+            const websitesContainer = document.getElementById(`websites-${userId}`);
+            if (websitesContainer.innerHTML !== '') {
+                websitesContainer.innerHTML = '';
                 return;
             }
 
-            // Get content based on upload method
-            if (currentUploadMethod === 'file') {
-                const fileInput = document.getElementById('htmlFile');
-                if (!fileInput.files[0]) {
-                    showMessage('userMessage', 'Pilih file HTML untuk diupload', 'error');
-                    return;
-                }
+            websitesContainer.innerHTML = '<p>Memuat website...</p>';
+            database.ref('userWebsites/' + userId).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const websiteIds = Object.keys(snapshot.val());
+                        if (websiteIds.length === 0) {
+                            websitesContainer.innerHTML = '<p>Pengguna ini tidak memiliki website.</p>';
+                            return;
+                        }
 
-                try {
-                    htmlContent = await readFileContent(fileInput.files[0]);
-                } catch (error) {
-                    showMessage('userMessage', 'Gagal membaca file: ' + error.message, 'error');
-                    return;
-                }
-            } else {
-                htmlContent = document.getElementById('htmlContent').value.trim();
-                if (!htmlContent) {
-                    showMessage('userMessage', 'Konten HTML harus diisi', 'error');
-                    return;
-                }
-            }
+                        const websitePromises = websiteIds.map(id =>
+                            database.ref('websites/' + id).once('value').then(s => s.val())
+                        );
 
-            // Basic HTML validation
-            if (!htmlContent.toLowerCase().includes('<html') && !htmlContent.toLowerCase().includes('<!doctype')) {
-                if (!confirm('File yang diupload sepertinya bukan HTML lengkap. Lanjutkan?')) {
-                    return;
-                }
-            }
+                        Promise.all(websitePromises)
+                            .then(websites => {
+                                let websitesHTML = '<h4>Website Pengguna:</h4>';
+                                websites.forEach(website => {
+                                    if (!website) return;
+                                    websitesHTML += `
+                                        <div class="website-item">
+                                            <h4>${sanitizeHTML(website.name)}</h4>
+                                            <p>URL: <a href="${website.url}" target="_blank">${website.url}</a></p>
+                                            <button class="delete-website-admin" data-id="${website.id}">Hapus Website</button>
+                                        </div>
+                                    `;
+                                });
+                                websitesContainer.innerHTML = websitesHTML;
 
-            try {
-                const websiteId = generateWebsiteId();
-                const website = {
-                    id: websiteId,
-                    title: title,
-                    content: htmlContent,
-                    owner: currentUser,
-                    createdAt: new Date().toISOString(),
-                    url: `${window.location.origin}/site/${websiteId}`
-                };
-
-                websites.push(website);
-
-                // Update user website count
-                const user = users.find(u => u.username === currentUser);
-                if (user) {
-                    user.websiteCount = (user.websiteCount || 0) + 1;
-                }
-
-                saveData();
-
-                showMessage('userMessage', `Website berhasil diupload! URL: ${website.url}`, 'success');
-                document.getElementById('uploadForm').reset();
-                document.getElementById('fileLabel').classList.remove('has-file');
-                document.getElementById('fileLabel').innerHTML = '📁 Pilih file HTML';
-                document.getElementById('fileInfo').classList.add('hidden');
-                loadUserWebsites();
-
-            } catch (error) {
-                showMessage('userMessage', 'Gagal mengupload website: ' + error.message, 'error');
-            }
-        });
-
-        function readFileContent(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = (e) => reject(new Error('Gagal membaca file'));
-                reader.readAsText(file);
-            });
+                                document.querySelectorAll('.delete-website-admin').forEach(button => {
+                                    button.addEventListener('click', (e) => {
+                                        const websiteId = e.target.getAttribute('data-id');
+                                        deleteWebsiteAdmin(websiteId, userId);
+                                    });
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error loading user websites:', error);
+                                websitesContainer.innerHTML = '<p>Terjadi kesalahan saat memuat website.</p>';
+                            });
+                    } else {
+                        websitesContainer.innerHTML = '<p>Pengguna ini tidak memiliki website.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user websites:', error);
+                    websitesContainer.innerHTML = '<p>Terjadi kesalahan saat memuat website.</p>';
+                });
         }
 
-        // Show user dashboard
-        function showUserDashboard() {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('userDashboard').classList.remove('hidden');
-            document.getElementById('userWelcome').textContent = `Selamat datang, ${currentUser}!`;
-            loadUserWebsites();
-        }
-
-        // Show admin dashboard
-        function showAdminDashboard() {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.remove('hidden');
-            loadAdminData();
-        }
-
-        // Load user websites
-        function loadUserWebsites() {
-            const userWebsites = websites.filter(w => w.owner === currentUser);
-            const container = document.getElementById('userWebsites');
-            container.innerHTML = '';
-
-            document.getElementById('userWebsiteCount').textContent = userWebsites.length;
-
-            if (userWebsites.length === 0) {
-                container.innerHTML = '<div class="message">Belum ada website yang diupload</div>';
-                return;
-            }
-
-            userWebsites.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-            userWebsites.forEach(website => {
-                const websiteCard = createWebsiteCard(website, false);
-                container.appendChild(websiteCard);
-            });
-        }
-
-        // Load admin data
-        function loadAdminData() {
-            document.getElementById('totalUsers').textContent = users.length;
-            document.getElementById('totalWebsites').textContent = websites.length;
-
-            const container = document.getElementById('allWebsites');
-            container.innerHTML = '';
-
-            if (websites.length === 0) {
-                container.innerHTML = '<div class="message">Belum ada website yang diupload</div>';
-                return;
-            }
-
-            const sortedWebsites = websites.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-            sortedWebsites.forEach(website => {
-                const websiteCard = createWebsiteCard(website, true);
-                container.appendChild(websiteCard);
-            });
-        }
-
-        // Create website card
-        function createWebsiteCard(website, isAdminView) {
-            const card = document.createElement('div');
-            card.className = 'website-card';
-
-            const ownerInfo = isAdminView ? `<p style="color: #718096; font-size: 0.9rem; margin-bottom: 0.5rem;">Pemilik: ${website.owner}</p>` : '';
-            const createdDate = new Date(website.createdAt).toLocaleDateString('id-ID', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            card.innerHTML = `
-                <div class="website-title">${website.title}</div>
-                ${ownerInfo}
-                <p style="color: #718096; font-size: 0.8rem; margin-bottom: 0.5rem;">Dibuat: ${createdDate}</p>
-                <a href="javascript:void(0)" onclick="openWebsite('${website.id}')" class="website-url">
-                    ${website.url}
-                </a>
-                <div class="card-actions">
-                    <button onclick="openWebsite('${website.id}')" class="btn">Preview</button>
-                    <button onclick="viewSource('${website.id}')" class="btn btn-secondary">Lihat Kode</button>
-                    <button onclick="downloadWebsite('${website.id}')" class="btn btn-secondary">Download</button>
-                    <button onclick="deleteWebsite('${website.id}', '${isAdminView ? 'admin' : 'user'}')" class="btn btn-danger">Hapus</button>
-                </div>
-            `;
-
-            return card;
-        }
-
-        // Open website in new window
-        function openWebsite(websiteId) {
-            const website = websites.find(w => w.id === websiteId);
-            if (website) {
-                const newWindow = window.open('', '_blank', 'width=1200,height=800');
-                newWindow.document.write(website.content);
-                newWindow.document.close();
+        // Fungsi untuk menghapus pengguna (admin)
+        function deleteUser(userId) {
+            if (confirm('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini akan menghapus semua website yang dimilikinya.')) {
+                database.ref('userWebsites/' + userId).once('value')
+                    .then(snapshot => {
+                        if (snapshot.exists()) {
+                            const websiteIds = Object.keys(snapshot.val());
+                            const deletePromises = websiteIds.map(id => database.ref('websites/' + id).remove());
+                            Promise.all(deletePromises)
+                                .then(() => {
+                                    database.ref('userWebsites/' + userId).remove()
+                                        .then(() => {
+                                            database.ref('users/' + userId).remove()
+                                                .then(() => {
+                                                    alert('Pengguna berhasil dihapus');
+                                                    loadAdminPage();
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error removing user:', error);
+                                                    alert('Terjadi kesalahan saat menghapus pengguna');
+                                                });
+                                        })
+                                        .catch(error => {
+                                            console.error('Error removing user websites reference:', error);
+                                            alert('Terjadi kesalahan saat menghapus pengguna');
+                                        });
+                                })
+                                .catch(error => {
+                                    console.error('Error removing websites:', error);
+                                    alert('Terjadi kesalahan saat menghapus website pengguna');
+                                });
+                        } else {
+                            database.ref('users/' + userId).remove()
+                                .then(() => {
+                                    alert('Pengguna berhasil dihapus');
+                                    loadAdminPage();
+                                })
+                                .catch(error => {
+                                    console.error('Error removing user:', error);
+                                    alert('Terjadi kesalahan saat menghapus pengguna');
+                                });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking user websites:', error);
+                        alert('Terjadi kesalahan saat memeriksa website pengguna');
+                    });
             }
         }
 
-        // View source code
-        function viewSource(websiteId) {
-            const website = websites.find(w => w.id === websiteId);
-            if (website) {
-                const newWindow = window.open('', '_blank', 'width=800,height=600');
-                newWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>Source: ${website.title}</title>
-                            <style>
-                                body { font-family: monospace; padding: 20px; background: #f5f5f5; }
-                                pre { background: white; padding: 15px; border-radius: 5px; overflow: auto; border: 1px solid #ddd; }
-                                .header { background: white; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ddd; }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="header">
-                                <h2>${website.title}</h2>
-                                <p><strong>Pemilik:</strong> ${website.owner}</p>
-                                <p><strong>Dibuat:</strong> ${new Date(website.createdAt).toLocaleString('id-ID')}</p>
+        // Fungsi untuk menghapus website (admin)
+        function deleteWebsiteAdmin(websiteId, userId) {
+            if (confirm('Apakah Anda yakin ingin menghapus website ini?')) {
+                database.ref('websites/' + websiteId).remove()
+                    .then(() => {
+                        database.ref('userWebsites/' + userId + '/' + websiteId).remove()
+                            .then(() => {
+                                alert('Website berhasil dihapus');
+                                toggleUserWebsites(userId);
+                            })
+                            .catch(error => {
+                                console.error('Error removing user website reference:', error);
+                                alert('Terjadi kesalahan saat menghapus website');
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Error removing website:', error);
+                        alert('Terjadi kesalahan saat menghapus website');
+                    });
+            }
+        }
+
+        // Fungsi untuk menampilkan alert
+        function showAlert(container, type, message) {
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        // Fungsi untuk menghasilkan UID
+        function generateUID() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // Fungsi untuk menangani parameter URL
+        function handleUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const websiteId = urlParams.get('website');
+            if (websiteId) {
+                database.ref('websites/' + websiteId).once('value')
+                    .then(snapshot => {
+                        if (snapshot.exists()) {
+                            const website = snapshot.val();
+                            document.body.innerHTML = website.html;
+                        } else {
+                            document.body.innerHTML = `
+                                <div class="container">
+                                    <h1>Website Tidak Ditemukan</h1>
+                                    <p>Website yang Anda cari tidak ditemukan atau telah dihapus.</p>
+                                    <a href="${window.location.origin}${window.location.pathname}">Kembali ke beranda</a>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading website:', error);
+                        document.body.innerHTML = `
+                            <div class="container">
+                                <h1>Terjadi Kesalahan</h1>
+                                <p>Terjadi kesalahan saat memuat website.</p>
+                                <a href="${window.location.origin}${window.location.pathname}">Kembali ke beranda</a>
                             </div>
-                            <pre>${website.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-                        </body>
-                    </html>
-                `);
+                        `;
+                    });
             }
         }
 
-        // Download website
-        function downloadWebsite(websiteId) {
-            const website = websites.find(w => w.id === websiteId);
-            if (website) {
-                const blob = new Blob([website.content], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${website.title.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+        // Event Listeners
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        homeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage(homePage);
+        });
+
+        loginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage(loginPage);
+        });
+
+        registerLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage(registerPage);
+        });
+
+        dashboardLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentUser) {
+                userName.textContent = currentUser.username;
+                showPage(dashboardPage);
+                loadUserWebsites(currentUser.uid);
             }
-        }
+        });
 
-        // Delete website
-        function deleteWebsite(websiteId, dashboardType) {
-            if (!confirm('Apakah Anda yakin ingin menghapus website ini?')) {
-                return;
-            }
+        adminLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage(adminPage);
+            loadAdminPage();
+        });
 
-            const websiteIndex = websites.findIndex(w => w.id === websiteId);
-            if (websiteIndex !== -1) {
-                const website = websites[websiteIndex];
-                websites.splice(websiteIndex, 1);
-
-                // Update user website count
-                const user = users.find(u => u.username === website.owner);
-                if (user) {
-                    user.websiteCount = Math.max((user.websiteCount || 1) - 1, 0);
-                }
-
-                saveData();
-
-                const messageId = dashboardType === 'admin' ? 'adminMessage' : 'userMessage';
-                showMessage(messageId, 'Website berhasil dihapus', 'success');
-
-                // Reload data
-                if (dashboardType === 'admin') {
-                    loadAdminData();
-                } else {
-                    loadUserWebsites();
-                }
-            }
-        }
-
-        // Logout
-        function logout() {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
             currentUser = null;
             isAdmin = false;
-
-            document.getElementById('userDashboard').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
-
-            // Reset forms
-            document.getElementById('userLoginForm').reset();
-            document.getElementById('adminLoginForm').reset();
-            document.getElementById('uploadForm').reset();
-
-            // Reset file upload UI
-            document.getElementById('fileLabel').classList.remove('has-file');
-            document.getElementById('fileLabel').innerHTML = '📁 Pilih file HTML';
-            document.getElementById('fileInfo').classList.add('hidden');
-
-            // Clear messages
-            document.getElementById('message').innerHTML = '';
-            document.getElementById('userMessage').innerHTML = '';
-            document.getElementById('adminMessage').innerHTML = '';
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function () {
-            // Load sample data if none exists
-            if (users.length === 0) {
-                // Add sample user
-                users.push({
-                    username: 'demo',
-                    createdAt: new Date().toISOString(),
-                    websiteCount: 1
-                });
-
-                // Add sample website
-                websites.push({
-                    id: 'sample001',
-                    title: 'Website Demo',
-                    content: `<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Demo</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            max-width: 500px;
-        }
-        h1 { color: #2d3436; margin-bottom: 1rem; }
-        p { color: #636e72; line-height: 1.6; }
-        .btn {
-            background: #00b894;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            margin-top: 1rem;
-            font-size: 16px;
-        }
-        .btn:hover { background: #00a085; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🚀 Selamat Datang di MyHost!</h1>
-        <p>Ini adalah contoh website yang dihosting menggunakan platform MyHost.</p>
-        <p>Anda dapat mengupload file HTML Anda sendiri dan melihat hasilnya langsung di sini.</p>
-        <button class="btn" onclick="alert('Hello dari MyHost!')">Klik Saya!</button>
-        <br><br>
-        <small>Dibuat dengan ❤️ menggunakan MyHost</small>
-    </div>
-</body>
-</html>`,
-                    owner: 'demo',
-                    createdAt: new Date().toISOString(),
-                    url: `${window.location.origin}/site/sample001`
-                });
-
-                saveData();
-            }
+            updateUI(null);
         });
+
+        loginBtn.addEventListener('click', () => {
+            login(loginUsername.value.trim());
+        });
+
+        registerBtn.addEventListener('click', () => {
+            register(registerUsername.value.trim());
+        });
+
+        uploadBtn.addEventListener('click', uploadWebsite);
+
+        // Inisialisasi aplikasi
+        function init() {
+            if (window.location.search.includes('website=')) {
+                handleUrlParams();
+                return;
+            }
+            updateUI(null);
+            showPage(homePage);
+        }
+
+        init();
     </script>
 </body>
-
 </html>
